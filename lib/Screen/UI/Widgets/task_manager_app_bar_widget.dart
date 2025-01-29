@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../../../API/Data Controller/auth_controller.dart';
 import '../../../Style/color_style.dart';
@@ -42,10 +44,9 @@ class TaskManagerAppBarWidget extends StatelessWidget
             },
             child: CircleAvatar(
               radius: 24,
-              backgroundImage: AssetImage('assets/image/5.jpg'),
+              backgroundImage: MemoryImage(base64Decode(AuthController.userModel?.photo??''))),
             ),
-          )
-        ],
+        ]
       )
       ,
     );
