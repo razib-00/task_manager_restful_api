@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rest_api02/API/Data%20Controller/network_request_response_data_controller.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
+import 'package:get/get.dart';
+import '../../API/Data Controller/Task_Controller/task_list_controller.dart';
 import '../../API_Model/get_task_list_model.dart';
 import '../../Custom_Widgets/background_image.dart';
 import '../../Style/circular_progress_indicator_widget.dart';
@@ -19,6 +19,7 @@ class CancelTaskPage extends StatefulWidget {
 
 class _CancelTaskPageState extends State<CancelTaskPage> {
 
+  final TaskListController _taskListController=Get.find<TaskListController>();
 
   @override
   void initState() {
@@ -26,11 +27,6 @@ class _CancelTaskPageState extends State<CancelTaskPage> {
     _cancelAPICall();
     super.initState();
   }
-
-
-  GetTaskListDataModel? getTaskListDataModel;
-  GetTaskListModel? _getTaskListModel;
-  bool _isVisible=false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,47 +39,39 @@ class _CancelTaskPageState extends State<CancelTaskPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Center(
-                  child: Visibility(
-                      visible: _isVisible==false,
-                      replacement: circularProgressIndicatorWidget(),
-                      child: _listViewBuilder()),
+                  child: GetBuilder<TaskListController>(builder: (controller){
+                    return Visibility(
+                        visible: _taskListController.inProgress==false,
+                        replacement: circularProgressIndicatorWidget(),
+                        child: _listViewBuilder());
+                  })
                 ),
               ),
             ),
           ],
         ),
       ),
-      drawer: const DrawerUi(),
+      endDrawer: const DrawerUi(),
     );
   }
 
   Widget _listViewBuilder() {
-    return ListView.builder(
-      itemCount: _getTaskListModel?.getTaskListData?.length??0,
-      itemBuilder: (context, index) {
-        final task = _getTaskListModel?.getTaskListData?[index];
-        if (task == null) return const SizedBox();
-        return paddingWidget(getTaskListDataModel: task);
-      },
-    );
+    return GetBuilder<TaskListController>(builder: (controller){
+      return ListView.builder(
+        itemCount: _taskListController.getTaskListData.length,
+        itemBuilder: (context, index) {
+          final task = _taskListController.getTaskListData[index];
+          return paddingWidget(getTaskListDataModel: task);
+        },
+      );
+    });
   }
 
   Future<void> _cancelAPICall()async{
-    setState(() {
-      _isVisible=true;
-    });
-    final NetworkResponse response =await NetworkCall.getRequest(
-        url: PathDirectoryUrls.listTaskByStatusUrl("Cancel"));
-    if(response.isSuccess){
-      setState(() {
-        _getTaskListModel=GetTaskListModel.fromJson(response.responseData!);
-      });
-    }else{
-      errorToast("${response.statusCode}");
+    final bool isSuccess=await _taskListController.cancelGetTaskList();
+    if(!isSuccess){
+      _taskListController.errorMsg;
     }
-    setState(() {
-      _isVisible=false;
-    });
   }
 
 
@@ -115,16 +103,16 @@ class paddingWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Container(
-                        child: Text(
-                          'Cancel',
-                          style: head5Text(colorWhite),
-                        ),
                         alignment: Alignment.center,
                         width: 100,
                         height: 30,
                         decoration: BoxDecoration(
                             color: colorRed,
                             borderRadius: BorderRadius.circular(50)),
+                        child: Text(
+                          'Cancel',
+                          style: head5Text(colorWhite),
+                        ),
                       ),
                       /* Chip(
                       label: Text(

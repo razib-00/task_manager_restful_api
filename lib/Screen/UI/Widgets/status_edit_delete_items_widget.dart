@@ -32,16 +32,16 @@ class StatusEditDeleteItemsWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Container(
-                        child: Text(
-                          'New',
-                          style: head5Text(colorWhite),
-                        ),
                         alignment: Alignment.center,
                         width: 100,
                         height: 30,
                         decoration: BoxDecoration(
                             color: colorPast,
                             borderRadius: BorderRadius.circular(50)),
+                        child: Text(
+                          'New',
+                          style: head5Text(colorWhite),
+                        ),
                       ),
                       /* Chip(
                       label: Text(

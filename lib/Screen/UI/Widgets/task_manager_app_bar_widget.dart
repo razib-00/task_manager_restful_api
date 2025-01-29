@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import '../../../API/Data Controller/auth_controller.dart';
+import '../../../API/Data Controller/Auth_Controller/auth_controller.dart';
 import '../../../Style/color_style.dart';
 import '../../../Style/text_message_style.dart';
 import '../../Profile/profile_screen.dart';
@@ -14,10 +16,23 @@ class TaskManagerAppBarWidget extends StatelessWidget
   Widget build(BuildContext context) {
     return AppBar(
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          GestureDetector(
+            onTap: () {
+              if (!fromUpdateProfile) {
+                Navigator.pushNamed(context, ProfileScreen.name);
+              }
+            },
+            child: CircleAvatar(
+                radius: 24,
+                backgroundImage: MemoryImage(base64Decode(AuthController.userModel?.photo??''))),
+          ),
+          const SizedBox(
+            width: 8,
+          ),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 AuthController.userModel?.fullName ?? '',
@@ -31,21 +46,8 @@ class TaskManagerAppBarWidget extends StatelessWidget
             ],
           ),
 
-          const SizedBox(
-            width: 8,
-          ),
-          GestureDetector(
-            onTap: () {
-              if (!fromUpdateProfile) {
-                Navigator.pushNamed(context, ProfileScreen.name);
-              }
-            },
-            child: CircleAvatar(
-              radius: 24,
-              backgroundImage: AssetImage('assets/image/5.jpg'),
-            ),
-          )
-        ],
+
+        ]
       )
       ,
     );

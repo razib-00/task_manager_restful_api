@@ -11,9 +11,9 @@ class GetTaskListModel {
     status = json['status'];
     if (json['data'] != null && json['data'] is List) {
       getTaskListData = <GetTaskListDataModel>[];
-      (json['data'] as List).forEach((v) {
+      for (var v in (json['data'] as List)) {
         getTaskListData!.add(GetTaskListDataModel.fromJson(v));
-      });
+      }
     }
   }
 

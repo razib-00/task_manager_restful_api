@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rest_api02/API/Data%20Controller/auth_controller.dart';
-import 'package:rest_api02/API/Data%20Controller/network_request_response_data_controller.dart';
+import 'package:get/get.dart';
+import 'package:rest_api02/API/Data%20Controller/Auth_Controller/auth_controller.dart';
 import 'package:rest_api02/Screen/UI/Widgets/custom_container_widget.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
-import '../../API_Model/recover_reset_pass.dart';
+import '../../API/Data Controller/Task_Controller/confirm_password_controller.dart';
 import '../../Custom_Widgets/background_color_list_screen.dart';
 import '../../Style/button_style.dart';
 import '../../Style/circular_progress_indicator_widget.dart';
@@ -27,7 +26,7 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isVisibilityPassword = false;
   bool _isVisibilityConfirmPassword = false;
-  final bool _isButtonVisibility=false;
+  final ConfirmPasswordController _confirmPasswordControllerA=Get.find<ConfirmPasswordController>();
 
 
   @override
@@ -164,36 +163,34 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
   }
 
   Widget _elevatedButton() {
-    return Visibility(
-      visible: _isButtonVisibility==false,
-      replacement: circularProgressIndicatorWidget(),
-      child: ElevatedButton(
-        onPressed: () async{
-          if (_formKey.currentState!.validate()) {
-            await _confirmPasswordApiCallMethod();
-          } else {
-            errorToast('Password Enter the valid password');
-          }
-        },
-        child: const Text('Submit'),
-        style: elevatedButton(),
-      ),
-    );
+    return GetBuilder<ConfirmPasswordController>(builder: (controller){
+      return Visibility(
+        visible:_confirmPasswordControllerA.inProgress==false,
+        replacement: circularProgressIndicatorWidget(),
+        child: ElevatedButton(
+          onPressed: () async{
+            if (_formKey.currentState!.validate()) {
+              await _confirmPasswordApiCallMethod();
+            } else {
+              errorToast('Password Enter the valid password');
+            }
+          },
+          style: elevatedButton(),
+          child: const Text('Submit'),
+        ),
+      );
+    });
   }
 
   Future<void> _confirmPasswordApiCallMethod() async{
-    _isButtonVisibility==true;
-    setState(() {});
-    Map<String,dynamic> responseBody={
-      "email":AuthController.userModel?.email??'',
-      "OTP":AuthController.userModel?.otp??'',
-      "password":_confirmPasswordController.text
-    };
-    final NetworkResponse response = await NetworkCall.postRequest(
-        url: PathDirectoryUrls.recoverResetPasswordUrl, body: responseBody);
-    if(response.isSuccess){
+    bool isSuccess=await _confirmPasswordControllerA.confirmPasswordApiCallMethod(
+        AuthController.userModel?.email??'',
+        AuthController.userModel?.otp??'',
+        _confirmPasswordController.text
+    );
+
+    if(isSuccess==true){
       try{
-        RecoverResetPass.fromJson(response.responseData!["data"]);
         _clearData();
         successToast('Password is updated!');
       }catch(e){

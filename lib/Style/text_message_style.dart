@@ -51,6 +51,13 @@ TextStyle head5Text(textColor){
       fontFamily: 'poppins',
       fontWeight: FontWeight.w400
   );
+}//H4 style
+TextStyle head4Text(){
+  return TextStyle(
+      fontSize: 20,
+      fontFamily: 'poppins',
+      fontWeight: FontWeight.w400
+  );
 }
 
 //H6 style

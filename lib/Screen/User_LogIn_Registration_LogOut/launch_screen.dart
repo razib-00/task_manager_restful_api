@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../API/Data Controller/auth_controller.dart';
+import '../../API/Data Controller/Auth_Controller/auth_controller.dart';
 import '../../Custom_Widgets/launching_image.dart';
 import '../../Style/color_style.dart';
 import '../../Style/text_message_style.dart';
@@ -23,9 +23,12 @@ class _LaunchScreenState extends State<LaunchScreen> {
   }
 
   Future<void> _navigateAfterDelay() async {
+
     await Future.delayed(const Duration(seconds: 3));
     bool isUserLogin = await AuthController.isUserLogin();
     if (isUserLogin) {
+      Navigator.pushReplacementNamed(context, BottomNavigationBarScreen.name);
+    }else if (isUserLogin) {
       Navigator.pushReplacementNamed(context, BottomNavigationBarScreen.name);
     } else {
       Navigator.pushReplacementNamed(context, LoginScreen.name);

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rest_api02/Screen/UI/Widgets/custom_container_widget.dart';
-
-import '../../API/Data Controller/network_request_response_data_controller.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
+import '../../API/Data Controller/Task_Controller/sing_up_controller.dart';
 import '../../API/error_screen/error_page.dart';
 import '../../Custom_Widgets/background_color_list_screen.dart';
 import '../../Style/button_style.dart';
@@ -11,7 +9,7 @@ import '../../Style/color_style.dart';
 import '../../Style/decoration_style.dart';
 import '../../Style/text_message_style.dart';
 import 'login_screen.dart';
-
+import 'package:get/get.dart';
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -29,7 +27,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isVisibility = false;
-  bool _isButtonVisibility = false;
+
+
+  final SingUPController _singUPController=Get.find<SingUPController>();
 
   @override
   Widget build(BuildContext context) {
@@ -154,17 +154,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _elevatedButton() {
-    return Visibility(
-      visible: _isButtonVisibility == false,
-      replacement: circularProgressIndicatorWidget(),
-      child: ElevatedButton(
-        onPressed: () {
-          _registrationButton();
-        },
-        child: const Text('Sign Up'),
-        style: elevatedButton(),
-      ),
-    );
+    return GetBuilder<SingUPController>(builder: (controller){
+      return Visibility(
+        visible: controller.inProgress == false,
+        replacement: circularProgressIndicatorWidget(),
+        child: ElevatedButton(
+          onPressed: () {
+            _registrationButton();
+          },
+          style: elevatedButton(),
+          child: const Text('Sign Up'),
+        ),
+      );
+    });
   }
 
   Widget _goToLoginAlign() {
@@ -195,24 +197,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _postRegistration() async {
-    _isButtonVisibility = true;
-    setState(() {});
+    final bool isSuccess=await _singUPController.postRegistration(
+         _emailController.text.trim(),
+     _firstNameController.text.trim(),
+     _lastNameController.text.trim(),
+     _phoneController.text.trim(),
+     _passwordController.text,
+    );
 
-    Map<String, dynamic> registrationRequestBody = {
-      "email": _emailController.text.trim(),
-      "firstName": _firstNameController.text.trim(),
-      "lastName": _lastNameController.text.trim(),
-      "mobile": _phoneController.text.trim(),
-      "password": _passwordController.text,
-      "photo": "",
-    };
 
-    final NetworkResponse response = await NetworkCall.postRequest(
-        url: PathDirectoryUrls.registrationUrl, body: registrationRequestBody);
-    _isButtonVisibility = false;
-    setState(() {});
-
-    if (response.isSuccess) {
+    if (isSuccess==true) {
       _clearText();
       Navigator.pushReplacementNamed(context, LoginScreen.name);
       successToast('SignUP Successful');

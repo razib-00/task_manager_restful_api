@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'API_Model/get_task_list_model.dart';
 import 'Screen/Pages/add_new_item.dart';
-import 'Screen/Pages/update_task.dart';
 import 'Screen/Profile/profile_screen.dart';
 import 'Screen/UI/Bottom & Drawer/bottom_navigation_bar.dart';
 import 'Screen/UI/Widgets/expanded_delete-widgets.dart';
@@ -12,6 +11,9 @@ import 'Screen/User_LogIn_Registration_LogOut/login_screen.dart';
 import 'Screen/User_LogIn_Registration_LogOut/otp_screen.dart';
 import 'Screen/User_LogIn_Registration_LogOut/sign_up_screen.dart';
 import 'Style/them_data_style.dart';
+import 'package:get/get.dart';
+
+import 'controller_binder.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -23,10 +25,11 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: defaultTheme,
       initialRoute: LaunchScreen.name,
+      initialBinding: ControllerBinder(),
       onGenerateRoute: (RouteSettings settings) {
         late Widget widget;
         if (settings.name == LaunchScreen.name) {
@@ -47,9 +50,6 @@ class _AppState extends State<App> {
           widget = const AddNewItem();
         } else if (settings.name == ProfileScreen.name) {
           widget = const ProfileScreen();
-        } else if (settings.name == UpdateTask.name) {
-          final GetTaskListDataModel getTaskListDataModel= settings.arguments as GetTaskListDataModel;
-          widget = UpdateTask(getTaskListDataModel : getTaskListDataModel);
         }else if (settings.name == ExpandedEditDeleteWidgets.name) {
           final GetTaskListDataModel getTaskListDataModel= settings.arguments as GetTaskListDataModel;
           widget = ExpandedEditDeleteWidgets(getTaskListDataModel : getTaskListDataModel);

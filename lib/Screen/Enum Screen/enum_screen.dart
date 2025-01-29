@@ -1,19 +1,38 @@
-// enum_screen.dart
 
 
-enum ItemStateEnum { New, Cancel,Progress, Completed }
+enum ItemStateEnum {
+  newState,
+  cancel,
+  progress,
+  completed;
 
-extension ItemStateEnumExtension on ItemStateEnum {
-  String get displayName {
+  @override
+  String toString() {
     switch (this) {
-      case ItemStateEnum.New:
+      case ItemStateEnum.newState:
         return "New";
-        case ItemStateEnum.Cancel:
+      case ItemStateEnum.cancel:
         return "Cancel";
-      case ItemStateEnum.Progress:
+      case ItemStateEnum.progress:
         return "Progress";
-      case ItemStateEnum.Completed:
+      case ItemStateEnum.completed:
         return "Completed";
+
     }
   }
+
+ /* TextStyle get textStyle {
+    switch (this) {
+      case ItemStateEnum.newState:
+      case ItemStateEnum.cancel:
+      case ItemStateEnum.progress:
+      case ItemStateEnum.completed:
+        return TextStyle(
+          fontFamily: 'poppins',
+          fontWeight: FontWeight.w400,
+          color: colorRed,
+        );
+
+    }
+  }*/
 }

@@ -1,11 +1,9 @@
 
 import 'package:flutter/material.dart';
-import 'package:rest_api02/API/Data%20Controller/auth_controller.dart';
-import 'package:rest_api02/API/Data%20Controller/network_request_response_data_controller.dart';
-import 'package:rest_api02/API_Model/user_model.dart';
+import 'package:get/get.dart';
+import 'package:rest_api02/API/Data%20Controller/Auth_Controller/auth_controller.dart';
 import 'package:rest_api02/Screen/UI/Widgets/custom_container_widget.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
-import '../../API_Model/PasswordRecoverEmailModel.dart';
+import '../../API/Data Controller/Task_Controller/forget_controller.dart';
 import '../../Custom_Widgets/background_color_list_screen.dart';
 import '../../Style/button_style.dart';
 import '../../Style/circular_progress_indicator_widget.dart';
@@ -34,7 +32,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final bool _isButtonVisible=false;
+
+  final ForgetController _forgetController=Get.find<ForgetController>();
 
   @override
   Widget build(BuildContext context) {
@@ -121,47 +120,34 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   }
 
   Widget _elevatedButton() {
-    return Visibility(
-      visible: _isButtonVisible==false,
-      replacement: circularProgressIndicatorWidget(),
-      child: ElevatedButton(
-            onPressed: () async{
-              if (_formKey.currentState!.validate()) {
-                await _forgetPasswordAPI();
-                Navigator.pushNamed(context, OtpScreen.name);
-              } else {
-                 errorToast('Please input valid email address');
-              }
-            },
-            child: customIconButton(),
-            style: elevatedButton(),
-          ),
-    );
+    return GetBuilder<ForgetController>(builder: (controller){
+      return Visibility(
+        visible: controller.inProgress==false,
+        replacement: circularProgressIndicatorWidget(),
+        child: ElevatedButton(
+          onPressed: () async{
+            if (_formKey.currentState!.validate()) {
+              await _forgetPasswordAPI();
+              Navigator.pushNamed(context, OtpScreen.name);
+            } else {
+              errorToast('Please input valid email address');
+            }
+          },
+          style: elevatedButton(),
+          child: customIconButton(),
+        ),
+      );
+    });
   }
 
   Future<void> _forgetPasswordAPI()async{
-    _isButtonVisible==true;
-    setState(() {});
-    String emailCont=_emailController.text;
-    final NetworkResponse response=await NetworkCall.getRequest(
-        url: PathDirectoryUrls.recoverVerifyEmailUrl(emailCont));
-
-    if(response.isSuccess){
-      PasswordRecoverEmailModel passwordRecoverEmailModel=PasswordRecoverEmailModel.fromJson(
-          response.responseData);
-      UserModel? userModel=AuthController.userModel;
-
-      if(userModel !=null && passwordRecoverEmailModel.status=="success"){
-        userModel.email=emailCont;
-        await AuthController.setUserAccountData(AuthController.accessKey??'', userModel);
-      }
+    bool isSuccess= await _forgetController.forgetPasswordAPI(_emailController.text);
+    if(isSuccess==true){
       successToast('Email pin send your mail successfully. Pleas check your mail');
     }
     else{
       successToast('Email pin send Failed');
     }
-    _isButtonVisible==false;
-    setState(() {});
   }
 
   @override

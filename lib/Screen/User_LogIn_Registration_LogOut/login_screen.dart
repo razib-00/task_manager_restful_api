@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rest_api02/API_Model/user_model.dart';
+import 'package:rest_api02/API/Data%20Controller/Task_Controller/login_controller.dart';
 import 'package:rest_api02/Screen/User_LogIn_Registration_LogOut/sign_up_screen.dart';
-import '../../API/Data Controller/auth_controller.dart';
-import '../../API/Data Controller/network_request_response_data_controller.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
 import '../../API/error_screen/error_page.dart';
 import '../../Custom_Widgets/background_color_list_screen.dart';
 import '../../Style/button_style.dart';
@@ -14,7 +11,7 @@ import '../../Style/text_message_style.dart';
 import '../UI/Bottom & Drawer/bottom_navigation_bar.dart';
 import '../UI/Widgets/custom_container_widget.dart';
 import 'forget_password.dart';
-
+import 'package:get/get.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -29,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isVisibility = false;
-  final bool _isButtonVisibility = false;
+  final LoginController _loginController=Get.find<LoginController>();
 
   @override
   Widget build(BuildContext context) {
@@ -135,17 +132,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _elevatedButton() {
-    return Visibility(
-      visible: _isButtonVisibility == false,
-      replacement: circularProgressIndicatorWidget(),
-      child: ElevatedButton(
-        onPressed: () {
-          _loginElevatedButton();
-        },
-        child: const Text('Sign In'),
-        style: elevatedButton(),
-      ),
-    );
+    return GetBuilder<LoginController>(builder:( controller){
+      return Visibility(
+        visible:controller.inProgress==false,
+        replacement: circularProgressIndicatorWidget(),
+        child: ElevatedButton(
+          onPressed: () {
+            _loginElevatedButton();
+          },
+          style: elevatedButton(),
+          child: const Text('Sign In'),
+        ),
+      );
+    });
   }
 
   Align _goToSignUpAlign() {
@@ -177,27 +176,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginPostRequester() async {
-    _isButtonVisibility == true;
-    setState(() {});
-
-    Map<String, dynamic> loginResponseBody = {
-      "email": _emailController.text.trim(),
-      "password": _passwordController.text
-    };
-    final NetworkResponse response = await NetworkCall.postRequest(
-        url: PathDirectoryUrls.loginUrl, body: loginResponseBody);
-
-    if (response.isSuccess) {
-
-      String token=response.responseData!["token"];
-      UserModel userModel=UserModel.fromJson(response.responseData!["data"]);
-      await AuthController.setUserData(token,userModel);
-
+    final bool isSuccess = await _loginController.loginPostRequester(
+        _emailController.text.trim(), _passwordController.text);
+    if (isSuccess) {
       Navigator.pushReplacementNamed(context, BottomNavigationBarScreen.name);
       successToast('Login successful');
     } else {
-      _isButtonVisibility == false;
-      setState(() {});
       ErrorPage.throwError;
     }
   }

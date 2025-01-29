@@ -1,4 +1,3 @@
-
 class PasswordRecoverEmailModel {
   PasswordRecoverEmailModel({
       String? status, 
@@ -138,7 +137,7 @@ class Envelope {
 
 
 class RejectedItem {
-  RejectedItem.fromJson(dynamic json) {}
+  RejectedItem.fromJson(dynamic json);
 
   Map<String, dynamic> toJson() {
     return {};

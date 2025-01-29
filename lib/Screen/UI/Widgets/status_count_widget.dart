@@ -17,25 +17,28 @@ class StatusCountWidget extends StatelessWidget {
         children: List.generate(
           1,
           (index) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Card(
               color: colorGrey,
-              elevation: 0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    count,
-                    style: head1Text(colorBlack),
-                  ),
-                  const SizedBox(
-                    width: 40,
-                  ),
-                  Text(
-                    title,
-                    style: head6Text(colorLightBlack),
-                  ),
-                ],
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      count,
+                      style: head1Text(colorBlack),
+                    ),
+                    const SizedBox(
+                      width: 40,
+                    ),
+                    Text(
+                      title,
+                      style: head6Text(colorLightBlack),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

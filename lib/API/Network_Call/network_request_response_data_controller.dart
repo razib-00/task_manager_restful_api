@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as h;
-import 'package:rest_api02/API/Data%20Controller/auth_controller.dart';
+import 'package:rest_api02/API/Data%20Controller/Auth_Controller/auth_controller.dart';
 
 class NetworkResponse {
   final int statusCode;
@@ -35,8 +35,6 @@ class NetworkCall {
 
       if (response.statusCode == 200) {
         final responseDecode = jsonDecode(response.body);
-        print("----------------------");
-        print(responseDecode);
         return NetworkResponse(
             statusCode: response.statusCode,
             isSuccess: true,

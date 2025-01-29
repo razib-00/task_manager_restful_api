@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rest_api02/API_Model/task_status_count_model.dart';
-import 'package:rest_api02/Screen/User_LogIn_Registration_LogOut/login_screen.dart';
-
-import '../../API/Data Controller/network_request_response_data_controller.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
-import '../../API_Model/get_task_list_model.dart';
+import 'package:get/get.dart';
+import '../../API/Data Controller/Task_Controller/task_count_controller.dart';
+import '../../API/Data Controller/Task_Controller/task_list_controller.dart';
 import '../../Custom_Widgets/background_image.dart';
 import '../../Style/button_style.dart';
 import '../../Style/circular_progress_indicator_widget.dart';
@@ -24,9 +21,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _stateChange = false;
-  GetTaskListModel? _getTaskListModel;
-  TaskStatusCountModel? _taskStatusCountModel;
 
   @override
   void initState() {
@@ -41,31 +35,36 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  final TaskListController _getTaskList=Get.find<TaskListController>();
+  final TaskCountController _getTaskCount=Get.find<TaskCountController>();
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: const TaskManagerAppBarWidget(),
       body: BackgroundImageScreen(
         child: Center(
-          child: Visibility(
-            visible: !_stateChange,
-            replacement: circularProgressIndicatorWidget(),
-            child: Column(
-              children: [
-
-                _dataCountWidget(),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: _taskListView(),
+          child: GetBuilder<TaskListController>(builder: (controller){
+            return Visibility(
+              visible: controller.inProgress==false,
+              replacement: circularProgressIndicatorWidget(),
+              child: Column(
+                children: [
+                  _dataCountWidget(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: _taskListView(),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
         ),
       ),
-      drawer: const DrawerUi(),
+      endDrawer: const DrawerUi(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, AddNewItem.name),
         backgroundColor: colorGreen,
@@ -77,77 +76,52 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _taskListView() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _getTaskListModel?.getTaskListData?.length ?? 0,
-      itemBuilder: (context, index) {
-        final task = _getTaskListModel?.getTaskListData?[index];
-        if (task == null) return const SizedBox();
-        return  StatusEditDeleteItemsWidget(getTaskListDataModel: task);
-      },
-    );
+    return GetBuilder<TaskListController>(builder: (controller){
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: controller.getTaskListData.length,
+        itemBuilder: (context, index) {
+          final task = controller.getTaskListData[index];
+          return  StatusEditDeleteItemsWidget(getTaskListDataModel: task);
+        },
+      );
+    });
   }
 
   Future<void> _getNewTaskList() async {
-    _setLoadingState(true);
-    final response = await NetworkCall.getRequest(
-      url: PathDirectoryUrls.listTaskByStatusUrl("New"),
-    );
-
-    if (response.isSuccess) {
-      setState(() {
-        _getTaskListModel = GetTaskListModel.fromJson(response.responseData!);
-      });
-      successToast(response.statusCode.toString());
-    } else {
-      errorToast("${response.statusCode}");
+    final bool isSuccess=await _getTaskList.newGetTaskList();
+    if (!isSuccess) {
+      errorToast("${_getTaskList.errorMsg}");
     }
-    _setLoadingState(false);
   }
 
   Future<void> _getStatusCountApi() async {
-    _setLoadingState(true);
-
-    final response = await NetworkCall.getRequest(
-      url: PathDirectoryUrls.taskStatusCountUrl,
-    );
-
-    if (response.isSuccess) {
-      setState(() {
-        _taskStatusCountModel = TaskStatusCountModel.fromJson(response.responseData);
-      });
-    } else {
-      Navigator.pushNamedAndRemoveUntil(context, LoginScreen.name, (value)=>false);
-      errorToast("${response.statusCode}");
-
+    final bool isSuccess=await _getTaskCount.getStatusCountApi();
+    if (!isSuccess) {
+      errorToast("${ _getTaskCount.errorMsg}");
     }
-    _setLoadingState(false);
+
   }
 
-  void _setLoadingState(bool state) {
-    if(!mounted) return;
-    setState(() {
-      _stateChange = state;
-    });
-  }
 
   Widget _dataCountWidget() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
         height: 100,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: _taskStatusCountModel?.data?.length ?? 0,
-          itemBuilder: (context, index) {
-            final taskStatus = _taskStatusCountModel?.data?[index];
-            if (taskStatus == null) return const SizedBox();
-            return StatusCountWidget(
-              count: taskStatus.sum.toString(),
-              title: taskStatus.id ?? '',
-            );
-          },
-        ),
+        child: GetBuilder<TaskCountController>(builder: (controller){
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: controller.countStatusData.length ,
+            itemBuilder: (context, index) {
+              final taskStatus = controller.countStatusData[index];
+              return StatusCountWidget(
+                count: taskStatus.sum.toString(),
+                title: taskStatus.id ?? '',
+              );
+            },
+          );
+        })
       ),
     );
   }

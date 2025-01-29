@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:rest_api02/API/Data%20Controller/auth_controller.dart';
-import 'package:rest_api02/API/Data%20Controller/network_request_response_data_controller.dart';
-import 'package:rest_api02/API/Path_Directory/path_directory_page.dart';
 import 'package:rest_api02/Screen/UI/Widgets/custom_container_widget.dart';
-import '../../API_Model/password_recover_email_o_t_p_model.dart';
-import '../../API_Model/user_model.dart';
+import '../../API/Data Controller/Task_Controller/otp_controller.dart';
 import '../../Custom_Widgets/background_color_list_screen.dart';
 import '../../Style/button_style.dart';
 import '../../Style/circular_progress_indicator_widget.dart';
@@ -26,7 +23,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   final TextEditingController _otpController=TextEditingController();
   final GlobalKey<FormState> _formKey=GlobalKey<FormState>();
-  final bool _isButtonVisible=false;
+  final OTPController _oTPController=Get.find<OTPController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,22 +104,24 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   Widget _elevatedButton(BuildContext context) {
-    return Visibility(
-      visible: _isButtonVisible==false,
-      replacement: circularProgressIndicatorWidget(),
-      child: ElevatedButton(
-        onPressed: () async{
-          if (_formKey.currentState!.validate()) {
-                await _otpApiCallMethod();
-                Navigator.pushNamed(context, ConfirmPassword.name);
-              } else {
-                 errorToast('Please enter valid pin');
-              }
+    return GetBuilder<OTPController>(builder: (controller){
+      return Visibility(
+        visible: controller.inProgress==false,
+        replacement: circularProgressIndicatorWidget(),
+        child: ElevatedButton(
+          onPressed: () async{
+            if (_formKey.currentState!.validate()) {
+              await _otpApiCallMethod();
+              Navigator.pushNamed(context, ConfirmPassword.name);
+            } else {
+              errorToast('Please enter valid pin');
+            }
           },
-        child:  customIconButton(),
-        style: elevatedButton(),
-      ),
-    );
+          style: elevatedButton(),
+          child:  customIconButton(),
+        ),
+      );
+    }) ;
   }
 
   Align _goToLoginAlign(BuildContext context) {
@@ -151,25 +150,14 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   Future<void> _otpApiCallMethod() async {
-    _isButtonVisible==true;
-    setState(() {});
-    String tempOTP = _otpController.text;
+    bool isSuccess= await _oTPController.otpApiCallMethod(
+        _otpController.text
+    );
     //AuthController.userModel?.otp
-    final NetworkResponse response = await NetworkCall.getRequest(
-        url: PathDirectoryUrls.recoverEmailOTPUrl(
-            "${AuthController.userModel?.email}", tempOTP));
-    if (response.isSuccess) {
-      PasswordRecoverEmailOTPModel passwordRecoverEmailOTPModel = PasswordRecoverEmailOTPModel.fromJson(response.responseData);
-      UserModel? userModel = AuthController.userModel;
-      if(userModel != null && passwordRecoverEmailOTPModel.status == "success"){
-        userModel.otp = tempOTP;
-        await AuthController.setUserData(AuthController.accessKey ?? "", userModel);
-      }
+    if (isSuccess==true) {
       successToast("OTP update successfully");
-    } else {
+    } else{
       errorToast("OTP update failed");
     }
-    _isButtonVisible==false;
-    setState(() {});
   }
 }

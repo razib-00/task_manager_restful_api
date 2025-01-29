@@ -1,10 +1,6 @@
-// add_new_item.dart
-
-
 import 'package:flutter/material.dart';
-
-import '../../API/Data Controller/network_request_response_data_controller.dart';
-import '../../API/Path_Directory/path_directory_page.dart';
+import 'package:get/get.dart';
+import '../../API/Data Controller/Task_Controller/add_task_list_controller.dart';
 import '../../Custom_Widgets/background_image.dart';
 import '../../Screen/Enum Screen/enum_screen.dart';
 import '../../Style/button_style.dart';
@@ -13,7 +9,7 @@ import '../../Style/color_style.dart';
 import '../../Style/decoration_style.dart';
 import '../../Style/text_message_style.dart';
 import '../UI/Bottom & Drawer/drawer_ui.dart';
-import '../UI/Widgets/task_manager_app_bar_widget.dart'; // Ensure this import is correct
+import '../UI/Widgets/task_manager_app_bar_widget.dart';
 
 class AddNewItem extends StatefulWidget {
   const AddNewItem({super.key});
@@ -25,10 +21,11 @@ class AddNewItem extends StatefulWidget {
 }
 
 class _AddNewItemState extends State<AddNewItem> {
+  final AddTaskListController _addTaskListController = Get.find<AddTaskListController>();
+
   final TextEditingController _taskTitleController = TextEditingController();
   final TextEditingController _taskDescriptionController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _isButtonVisible = false;
 
   ItemStateEnum? itemStateEnumOption;
 
@@ -41,7 +38,7 @@ class _AddNewItemState extends State<AddNewItem> {
           child: _buildForm(),
         ),
       ),
-      drawer: const DrawerUi(),
+      endDrawer: const DrawerUi(),
     );
   }
 
@@ -53,84 +50,95 @@ class _AddNewItemState extends State<AddNewItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(
-              height: 40,
+            const SizedBox(height: 40),
+            Card(
+                elevation:5,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Add Your Items', style: head1Text(colorGreen)),
+                )
             ),
-            Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'Add Your Items',
-                      style: head1Text(colorGreen),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    DropdownButton<ItemStateEnum>(
-                      value: itemStateEnumOption,
-                      autofocus: true,
-                      elevation: 5,
-
-                      hint: Text('Select Status',style: head5Text(colorLightGreen),),
-                      dropdownColor: colorGrey,
-                      style: head5Text(colorViolet),
-                      enableFeedback: true,
-                      onChanged: (ItemStateEnum? newOption) {
-                        setState(() {
-                          itemStateEnumOption = newOption;
-                        });
-                      },
-                      items: ItemStateEnum.values
-                          .map<DropdownMenuItem<ItemStateEnum>>(
-                              (ItemStateEnum itemEnumOption) {
-                            return DropdownMenuItem<ItemStateEnum>(
-                              value: itemEnumOption,
-                              child: Text(itemEnumOption.displayName),
-                            );
-                          }).toList(),
-                    ),
-                  ],
-                )),
-            const SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              controller: _taskTitleController,
-              decoration: inputDecoration('Subject'),
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return errorToast('Please enter your subject');
-                }
-                return null;
-              },
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            TextFormField(
-              controller: _taskDescriptionController,
-              minLines: 3,
-              maxLines: 6,
-              maxLength: 1000,
-              decoration: inputDecoration('Description'),
-              validator: (String? value) {
-                if (value?.trim().isEmpty ?? true) {
-                  return errorToast('Please enter your description');
-                }
-                return null;
-              },
-            ),
-            FloatingActionButton.extended(
-              onPressed: () {
-                _submitButtonMethod();
-              },
-              backgroundColor: colorGreen,
-              hoverColor: colorAmber,
-              label: Visibility(
-                visible: !_isButtonVisible,
-                replacement: circularProgressIndicatorWidget(),
-                child: Text('Submit', style: buttonTextStyle(colorWhite)),
+            const SizedBox(height: 30),
+            Card(
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButtonFormField<ItemStateEnum>(
+                  value: itemStateEnumOption,
+                  autofocus: true,
+                  elevation: 5,
+                  hint: Text('Select Status', style: head5Text(colorLightGreen)),
+                  dropdownColor: colorGrey,
+                  enableFeedback: true,
+                  style: head5Text(colorGreen),
+                  onChanged: (ItemStateEnum? newOption) {
+                    setState(() {
+                      itemStateEnumOption = newOption;
+                    });
+                  },
+                  items: ItemStateEnum.values
+                      .map<DropdownMenuItem<ItemStateEnum>>(
+                          (ItemStateEnum itemEnumOption) {
+                        return DropdownMenuItem<ItemStateEnum>(
+                          value: itemEnumOption,
+                          child: Text(itemEnumOption.toString()), // Ensure `displayName` is defined
+                        );
+                      }).toList(),
+                  validator: (ItemStateEnum? value) {
+                    if (value == null) {
+                      return 'Please select a status';
+                    }
+                    return null;
+                  },
+                ),
               ),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              elevation: 5,
+              child: TextFormField(
+                controller: _taskTitleController,
+                decoration: inputDecoration('Subject'),
+                validator: (String? value) {
+                  if (value?.trim().isEmpty ?? true) {
+                    return 'Please enter your subject';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(height: 15),
+            Card(
+              elevation: 5,
+              child: TextFormField(
+                controller: _taskDescriptionController,
+                minLines: 3,
+                maxLines: 6,
+                maxLength: 1000,
+                decoration: inputDecoration('Description'),
+                validator: (String? value) {
+                  if (value?.trim().isEmpty ?? true) {
+                    return 'Please enter your description';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            GetBuilder<AddTaskListController>(
+              builder: (controller) {
+                return Visibility(
+                  visible: !controller.inProgress==false,
+                  replacement: circularProgressIndicatorWidget(),
+                  child: ElevatedButton(
+                    onPressed: (){
+                       _submitButtonMethod();
+                    },
+                    style: elevatedButton(),
+                    child: Text('Submit', style: buttonTextStyle(colorWhite)),
+                ),
+                );
+              },
             ),
           ],
         ),
@@ -138,42 +146,37 @@ class _AddNewItemState extends State<AddNewItem> {
     );
   }
 
-  void _submitButtonMethod() {
+  void _submitButtonMethod()async{
     if (_formKey.currentState!.validate()) {
-      _addItemApiCallMethod();
+      await _addItemApiCallMethod();
     }
   }
 
   Future<void> _addItemApiCallMethod() async {
-    setState(() {
-      _isButtonVisible = true;
-    });
+    try {
+      final bool isSuccess = await _addTaskListController.getAddItemApiCallMethod(
+        _taskTitleController.text.trim(),
+        _taskDescriptionController.text.trim(),
+        itemStateEnumOption?.toString().split('.').last ?? '',
+      );
 
-    Map<String, dynamic> addItemMapPostBody = {
-      "title": _taskTitleController.text.trim(),
-      "description": _taskDescriptionController.text.trim(),
-      "status": itemStateEnumOption?.toString().split('.').last,
-    };
-
-    final NetworkResponse response = await NetworkCall.postRequest(
-        url: PathDirectoryUrls.createTaskUrl,
-        body: addItemMapPostBody);
-
-    setState(() {
-      _isButtonVisible = false;
-    });
-
-    if (response.isSuccess) {
-      _clearNewTaskAdd();
-      successToast("New task is added successfully!");
-    } else {
-      errorToast("New items added fail");
+      if (isSuccess) {
+        _clearNewTaskAdd();
+        successToast("New task is added successfully!");
+      } else {
+        errorToast("New items added fail");
+      }
+    } catch (e) {
+      errorToast("An error occurred: $e");
     }
   }
 
   void _clearNewTaskAdd() {
-    _taskDescriptionController.clear();
-    _taskTitleController.clear();
+    setState(() {
+      _taskDescriptionController.clear();
+      _taskTitleController.clear();
+      itemStateEnumOption = null;
+    });
   }
 
   @override
