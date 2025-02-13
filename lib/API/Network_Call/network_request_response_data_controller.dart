@@ -1,7 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as h;
 import 'package:rest_api02/API/Data%20Controller/Auth_Controller/auth_controller.dart';
+import 'package:rest_api02/Screen/User_LogIn_Registration_LogOut/login_screen.dart';
+
+import '../../app.dart';
 
 class NetworkResponse {
   final int statusCode;
@@ -17,20 +21,15 @@ class NetworkResponse {
 }
 
 class NetworkCall {
-
   //get request
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
       Uri uri = Uri.parse(url);
       debugPrint('URL=>$url');
-      h.Response response = await h.get(
-          uri,
-          headers: {
-            'token': AuthController.accessToken??''
-          }
-      );
+      h.Response response = await h
+          .get(uri, headers: {'token': AuthController.accessToken ?? ''});
 
-       debugPrint('Response Code=>${response.statusCode}');
+      debugPrint('Response Code=>${response.statusCode}');
       debugPrint('Response Data=>${response.body}');
 
       if (response.statusCode == 200) {
@@ -39,6 +38,10 @@ class NetworkCall {
             statusCode: response.statusCode,
             isSuccess: true,
             responseData: responseDecode);
+      } else if (response.statusCode == 401) {
+        await _login();
+        return NetworkResponse(
+            statusCode: response.statusCode, isSuccess: true);
       } else {
         return NetworkResponse(
             statusCode: response.statusCode, isSuccess: false);
@@ -56,13 +59,13 @@ class NetworkCall {
       Uri uri = Uri.parse(url);
       debugPrint('URL=>$url');
       debugPrint('Body=>${jsonEncode(body)}');
-      h.Response response = await h.post(uri,
-          headers: {
-        "Content-Type": "application/json",
-            'token': AuthController.accessToken??''
-          },
-          body: jsonEncode(body),
-
+      h.Response response = await h.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          'token': AuthController.accessToken ?? ''
+        },
+        body: jsonEncode(body),
       );
       debugPrint('Response Code=>${response.statusCode}');
       debugPrint(' ${AuthController.accessToken}');
@@ -73,6 +76,10 @@ class NetworkCall {
             statusCode: response.statusCode,
             isSuccess: true,
             responseData: responseDecode);
+      } else if (response.statusCode == 401) {
+        await _login();
+        return NetworkResponse(
+            statusCode: response.statusCode, isSuccess: true);
       } else {
         return NetworkResponse(
           statusCode: response.statusCode,
@@ -83,5 +90,11 @@ class NetworkCall {
       return NetworkResponse(
           statusCode: -1, isSuccess: false, errorMessage: e.toString());
     }
+  }
+
+  static Future<void> _login() async {
+    await AuthController.dataClear();
+    Navigator.pushNamedAndRemoveUntil(App.navigatorKey.currentContext!,
+        LoginScreen.name, (predicate) => false);
   }
 }
