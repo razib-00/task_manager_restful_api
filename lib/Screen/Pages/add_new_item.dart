@@ -128,7 +128,7 @@ class _AddNewItemState extends State<AddNewItem> {
             GetBuilder<AddTaskListController>(
               builder: (controller) {
                 return Visibility(
-                  visible: !controller.inProgress==false,
+                  visible: controller.inProgress==false,
                   replacement: circularProgressIndicatorWidget(),
                   child: ElevatedButton(
                     onPressed: (){
