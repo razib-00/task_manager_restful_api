@@ -15,19 +15,16 @@ import 'package:get/get.dart';
 
 import 'controller_binder.dart';
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App({super.key});
 
-  @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
+  static GlobalKey<NavigatorState> navigatorKey=GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: defaultTheme,
+      navigatorKey: navigatorKey,
       initialRoute: LaunchScreen.name,
       initialBinding: ControllerBinder(),
       onGenerateRoute: (RouteSettings settings) {
