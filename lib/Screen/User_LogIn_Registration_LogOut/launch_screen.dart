@@ -28,8 +28,6 @@ class _LaunchScreenState extends State<LaunchScreen> {
     bool isUserLogin = await AuthController.isUserLogin();
     if (isUserLogin) {
       Navigator.pushReplacementNamed(context, BottomNavigationBarScreen.name);
-    }else if (isUserLogin) {
-      Navigator.pushReplacementNamed(context, BottomNavigationBarScreen.name);
     } else {
       Navigator.pushReplacementNamed(context, LoginScreen.name);
     }
