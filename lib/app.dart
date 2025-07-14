@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'API_Model/get_task_list_model.dart';
-import 'Screen/Pages/add_new_item.dart';
-import 'Screen/Pages/update_task.dart';
-import 'Screen/Profile/profile_screen.dart';
-import 'Screen/UI/Bottom & Drawer/bottom_navigation_bar.dart';
-import 'Screen/UI/Widgets/expanded_delete-widgets.dart';
-import 'Screen/User_LogIn_Registration_LogOut/conform_password.dart';
-import 'Screen/User_LogIn_Registration_LogOut/forget_password.dart';
-import 'Screen/User_LogIn_Registration_LogOut/launch_screen.dart';
-import 'Screen/User_LogIn_Registration_LogOut/login_screen.dart';
-import 'Screen/User_LogIn_Registration_LogOut/otp_screen.dart';
-import 'Screen/User_LogIn_Registration_LogOut/sign_up_screen.dart';
+import 'feature/add new/screen/add_new_item.dart';
+import 'feature/Profile/screen/profile_screen.dart';
+import 'feature/UI/Bottom & Drawer/bottom_navigation_bar.dart';
+import 'feature/UI/Widgets/expanded_delete-widgets.dart';
+import 'feature/auth/conform password/screen/conform_password.dart';
+import 'feature/auth/fontget password/screen/forget_password.dart';
+import 'feature/auth/launch_screen.dart';
+import 'feature/auth/login/screen/login_screen.dart';
+import 'feature/auth/otp/screen/otp_screen.dart';
 import 'Style/them_data_style.dart';
+import 'feature/auth/singup/sign_up_screen.dart';
+import 'feature/status pages/update_task.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -54,7 +54,6 @@ class _AppState extends State<App> {
           final GetTaskListDataModel getTaskListDataModel= settings.arguments as GetTaskListDataModel;
           widget = ExpandedEditDeleteWidgets(getTaskListDataModel : getTaskListDataModel);
         }
-
         return MaterialPageRoute(builder: (_) => widget);
       },
     );
